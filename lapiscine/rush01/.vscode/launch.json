@@ -1,0 +1,23 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "gcc",
+            "args": [
+                "-o",
+                "main.c",
+                "check4line.c",
+                "findright.c",
+                "findup.c",
+                "-Wall",
+                "-Wextra"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}

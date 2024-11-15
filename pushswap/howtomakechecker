@@ -1,0 +1,27 @@
+https://velog.io/@jongeun/pushswap-Day-10
+
+기능
+./push_swap $ARG | ./checker $ARG 이렇게 실행을 하면, ARG가 checker의 main()에 인자로 들어가고 push_swap의 결과물, pa나 sa 이렇게 출력된 결과가 파이프를 넘어서(?) STDIN으로 들어간다.
+그냥 예를 들자면, ./push_swap 1 3 4 5 2 | ./checker 1 3 4 5 2로 실행했다고 하자.
+push_swap의 결과는~
+
+rra
+sa
+뭐 이렇게 됐을 것이다. 이 문자열이 파이프 뒤쪽에 STDIN으로 들어간다.
+그러면 checker에서는 get_next_line()을 사용해서 STDIN에 들어온 문자열을 개행 단위로 잘라서 읽어주면 된다.
+그리고 각 라인이 어떤 operation인지 확인해서, 그에 맞는 기능을 실행시켜 main()으로 들어온 인자를 정렬해준다.
+그리고 모두 끝나면 스택 a가 최종적으로 정렬되었는지와 스택 b에는 아무것도 남아있지 않은지를 확인해서 둘 다 해당되면 OK, 둘 중 하나라도 아니면 KO를 출력하면 된다.
+
+만약에 앞에 push_swap을 먼저 실행시키지 않고 그냥 ./checker 1 5 2 4 3 이렇게만 들어오면, STDIN에 아무것도 없을 테니까 문자열 입력을 기다리게 대기시킨다.
+그럼 이제 직접 operation을 입력해서 정렬을 시켜주다가 CTRL+D를 입력해서 종료했을 때의 결과를 확인해서 OK 또는 KO를 출력하면 된다.
+
+push_swap과 마찬가지로 에러 사항들은 예외처리를 해주면 된다.
+추가로, 없는 operation이 들어왔을 때나 operation 앞 뒤로 공백이 들어가면 에러로 처리한다.
+
+코드
+위에서 다 적어서 쓸 게 없다.
+
+거의 push_swap에서 작성했던 코드들을 그대로 가져와서 사용했다.
+대신, 여기서는 operation을 실행시켜도 어떤 operation인지 출력하지 않는다.
+그래서 flag를 0으로 넣어줬다.
+그리고 뭐 get_next_line()으로 한 줄씩 읽고 사용하고 나서 free() 해줘야 한다.

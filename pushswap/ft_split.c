@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   ft_split.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: minpark <minpark@student.42gyeongsan.      +#+  +:+       +#+        */
+/*   By: minpark <minpark@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/14 20:03:30 by minpark           #+#    #+#             */
-/*   Updated: 2024/07/16 13:08:52 by minpark          ###   ########.fr       */
+/*   Updated: 2024/11/13 21:09:11 by minpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-#include <stdlib.h>
 
-int	str_cmp(char *a, char me)
+#include "main_pushswap.h"
+
+int	str_c(char *a, char me)
 {
 	while (*a)
 	{
@@ -22,10 +23,12 @@ int	str_cmp(char *a, char me)
 	return (0);
 }
 
-int	c_w(char *str, char *charset, int i)
+int	c_w(char const *str, char *charset)
 {
 	int	k;
+	int	i;
 
+	i = 0;
 	k = 0;
 	while (str[i])
 	{
@@ -39,19 +42,17 @@ int	c_w(char *str, char *charset, int i)
 	return (k);
 }
 
-char	*in_info(char *str, char *charset)
+static char	*in_info(char const *str, char *charset)
 {
 	int		i;
 	char	*coll;
 
 	i = 0;
-	while (str[i])
-	{
-		while (!str_c(charset, str[i]) && str[i])
-			i++;
-		break ;
-	}
+	while (!str_c(charset, str[i]) && str[i])
+		i++;
 	coll = (char *)malloc(i * sizeof(char) + 1);
+	if (coll == NULL)
+		return (NULL);
 	i = 0;
 	while (*str)
 	{
@@ -67,26 +68,37 @@ char	*in_info(char *str, char *charset)
 	return (coll);
 }
 
+char	**ft_freeall(char **list)
+{
+	size_t	j;
+
+	j = 0;
+	while (list[j])
+	{
+		free(list[j]);
+		j++;
+	}
+	free(list);
+	return (NULL);
+}
+
 char	**ft_split(char *str, char *charset)
 {
 	int		k;
-	int		j;
 	int		ready;
 	char	**coll;
 
 	ready = 1;
 	k = 0;
-	j = -1;
-	coll = (char **) malloc ((c_w(str, charset, 0) + 1) * sizeof(char *));
+	coll = (char **) malloc ((c_w(str, charset) + 1) * sizeof(char *));
 	while (*str)
 	{	
-		if (!str_c(charset, *str) && *str)
+		if (!str_c(charset, *str) && *str && ready == 1)
 		{
-			if (ready == 1)
-			{	
-				coll[k++] = in_info(str, charset);
-				ready = 0;
-			}
+			coll[k++] = in_info(str, charset);
+			if (coll[k - 1] == NULL)
+				ft_freeall(coll);
+			ready = 0;
 		}
 		else if (str_c(charset, *str) && *str)
 			ready = 1;

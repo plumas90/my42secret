@@ -1,0 +1,55 @@
+https://42-cursus.gitbook.io/guide/rank-01/born2beroot
+
+가급적이면 "자동으로 키보드 잡기 옵션 (Auto Capture Keyboard)" 를 해제하고 과제 실습을 진행하면 어떨까 합니다.
+최근에 virtual box에서 먹통 현상이 발생했을 때, 카뎃의 자리에서 아무런 조치를 취할 수 없는 현상이 발생하였습니다.
+이때, 위 옵션이 활성화 된 채 과제를 수행하다가 virtual box 에서 문제가 발생하게 되면 입력 장치가 가상 머신에 잡혀 있어서 Alt-Tab 같은 시스템 동작을 비롯한 모든 키보드 입력이 호스트 pc에 전달되지 못하게 되어, 긴급 로그아웃 단축키 등이 먹히지 않게 됩니다.
+평소에는 호스트 키를 눌러서 키보드가 잡힌 상태를 해제할 수 있지만, virtual box 자체가 문제가 발생하는 상황에서는 호스트 키 자체가 동작을 하지 않을 경우에는 아무런 손을 쓸 수 없게 됩니다.
+[조치 방법]
+virtual box 좌측 상단의 [File - Preference] 클릭
+[Input] 패널 클릭 -> [Auto Capture Keyboard] 체크박스 해제
+OK 버튼 클릭
+
+Defaults	secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin"
+뒤에 :/snap/bin 만 추가하면됨
+
+Defaults	authfail_message="메세지" sudo 권한 획득 실패 메시지
+Defaults	badpass_message="메세지" sudo 비번 실패
+Defaults	log_input #sudo명령어 입력된 명령어 log로
+Defaults	log_output #sudo명령어 출력 결과를 log로
+Defaults	requiretty #sudo명령어 실행 시 tty강제 - tty는 반드시 수도 명령어를 터미널에서 입력해야한다는뜻
+Defaults	iolog_dir="/var/log/sudo/" sudo log 저장 디렉토리 경로
+Defaults	passwd_tries=3 #sudo 비번 시도 횟수
+
+
+#!/bin/bash
+arc=$(uname -a)
+pcpu=$(grep "physical id" /proc/cpuinfo | sort | uniq | wc -l)
+vcpu=$(grep "^processor" /proc/cpuinfo | wc -l)
+fram=$(free -m | awk '$1 == "Mem:" {print $2}')
+uram=$(free -m | awk '$1 == "Mem:" {print $3}')
+pram=$(free | awk '$1 == "Mem:" {printf("%.2f"), $3/$2*100}')
+fdisk=$(df -Bg | grep '^/dev/' | grep -v '/boot$' | awk '{ft += $2} END {print ft}')
+udisk=$(df -Bm | grep '^/dev/' | grep -v '/boot$' | awk '{ut += $3} END {print ut}')
+pdisk=$(df -Bm | grep '^/dev/' | grep -v '/boot$' | awk '{ut += $3} {ft+= $2} END {printf("%d"), ut/ft*100}')
+cpul=$(top -bn1 | grep '^%Cpu' | cut -c 9- | xargs | awk '{printf("%.1f%%"), $1 + $3}')
+lb=$(who -b | awk '$1 == "system" {print $3 " " $4}')
+lvmt=$(lsblk | grep "lvm" | wc -l)
+lvmu=$(if [ $lvmt -eq 0 ]; then echo no; else echo yes; fi)
+#You need to install net tools for the next step [$ sudo apt install net-tools]
+ctcp=$(cat /proc/net/sockstat{,6} | awk '$1 == "TCP:" {print $3}')
+ulog=$(users | wc -w)
+ip=$(hostname -I)
+mac=$(ip link show | awk '$1 == "link/ether" {print $2}')
+cmds=$(journalctl _COMM=sudo | grep COMMAND | wc -l) # journalctl should be running as sudo but our script is running as root so we don't need in sudo here
+wall "	#Architecture: $arc
+	#CPU physical: $pcpu
+	#vCPU: $vcpu
+	#Memory Usage: $uram/${fram}MB ($pram%)
+	#Disk Usage: $udisk/${fdisk}Gb ($pdisk%)
+	#CPU load: $cpul
+	#Last boot: $lb
+	#LVM use: $lvmu
+	#Connexions TCP: $ctcp ESTABLISHED
+	#User log: $ulog
+	#Network: IP $ip ($mac)
+	#Sudo: $cmds cmd" # broadcast our system information on all terminals
